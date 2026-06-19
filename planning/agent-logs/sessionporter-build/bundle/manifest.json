@@ -1,0 +1,44 @@
+{
+  "schemaVersion": "1.0",
+  "exporterVersion": "0.1.0",
+  "source": "claude-code",
+  "sourceSessionId": "a9ca177b0cfd",
+  "exportedAt": "2026-06-19T19:33:02.879Z",
+  "mode": "sanitized",
+  "eventCount": 16,
+  "files": [
+    "README.md",
+    "REDACTION_REPORT.md",
+    "checksums.sha256",
+    "manifest.json",
+    "session.events.jsonl",
+    "session.normalized.jsonl",
+    "session.summary.md",
+    "session.transcript.md"
+  ],
+  "checksums": {
+    "session.normalized.jsonl": "5446d26d716b679168c09744a9a806ee7c2adc3f62f2c1305cc9d255607f56f2",
+    "session.events.jsonl": "cbf3ebfd163bdec2112ecbbece8903298789d127472488f23505abd3da0dcf01",
+    "session.transcript.md": "ffabc848255034b820ab5428becbedcf0dd362700071397511f7549054a9ba5b",
+    "session.summary.md": "4b49433033103bc8b60aef8cf3d242611932882295378b6746402a91ccb64f8a",
+    "REDACTION_REPORT.md": "cca9793399d9f1fb8540c815fbe0b95fd0bcbc9192e60a6ba5df05b54d96dc2c",
+    "README.md": "fda62df207e2bd3059766f87bff333d272b5f3617b6b35fbeb089db451b977ef"
+  },
+  "redactionSummary": {
+    "total": 7,
+    "byCategory": {
+      "api_key": 2,
+      "email": 1,
+      "home_path": 2,
+      "connection_string": 1,
+      "token": 1
+    }
+  },
+  "warnings": [
+    "Line 14 is not valid JSON; skipped."
+  ],
+  "completeness": {
+    "knownComplete": false,
+    "reason": "Records are the local Claude Code session log. Plaintext 'thinking' (model reasoning) blocks are included where present; truncated tool outputs are marked. A single .jsonl can be a resumed or forked session, so it may be a partial logical conversation. No cloud account was accessed."
+  }
+}
