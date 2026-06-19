@@ -1,0 +1,17 @@
+{"type":"summary","summary":"Add CSV export to demo-project"}
+{"type":"user","uuid":"u1","sessionId":"sess-basic-0001","cwd":"/home/devuser/demo-project","timestamp":"2026-06-19T09:00:00Z","version":"1.0.0","message":{"role":"user","content":"Add a CSV export. For testing my key is sk-FAKEKEY1234567890ABCDEFGHIJ and email devuser@example.com"}}
+{"type":"assistant","uuid":"a1","timestamp":"2026-06-19T09:00:05Z","message":{"role":"assistant","content":[{"type":"text","text":"On it. Reading the app first."}]}}
+{"type":"assistant","uuid":"a2","timestamp":"2026-06-19T09:00:07Z","message":{"role":"assistant","content":[{"type":"tool_use","id":"t1","name":"Read","input":{"file_path":"/home/devuser/demo-project/src/app.ts"}}]}}
+{"type":"user","uuid":"u2","timestamp":"2026-06-19T09:00:07Z","message":{"role":"user","content":[{"type":"tool_result","tool_use_id":"t1","content":"export function app() { return 0; }"}]}}
+{"type":"assistant","uuid":"a3","timestamp":"2026-06-19T09:00:10Z","message":{"role":"assistant","content":[{"type":"tool_use","id":"t2","name":"Bash","input":{"command":"npm test"}}]}}
+{"type":"user","uuid":"u3","timestamp":"2026-06-19T09:00:18Z","message":{"role":"user","content":[{"type":"tool_result","tool_use_id":"t2","is_error":true,"content":"FAIL src/app.test.ts: exportCsv is not a function"}]}}
+{"type":"assistant","uuid":"a4","timestamp":"2026-06-19T09:00:22Z","message":{"role":"assistant","content":[{"type":"tool_use","id":"t3","name":"Edit","input":{"file_path":"src/app.ts","old_string":"function app","new_string":"export function exportCsv"}}]}}
+{"type":"user","uuid":"u4","timestamp":"2026-06-19T09:00:22Z","message":{"role":"user","content":[{"type":"tool_result","tool_use_id":"t3","content":"Edit applied to src/app.ts"}]}}
+{"type":"assistant","uuid":"a5","timestamp":"2026-06-19T09:00:26Z","message":{"role":"assistant","content":[{"type":"tool_use","id":"t4","name":"Bash","input":{"command":"npm test"}}]}}
+{"type":"user","uuid":"u5","timestamp":"2026-06-19T09:00:33Z","message":{"role":"user","content":[{"type":"tool_result","tool_use_id":"t4","content":"Tests 3 passed (3)"}]}}
+{"type":"assistant","uuid":"a6","timestamp":"2026-06-19T09:00:36Z","message":{"role":"assistant","content":[{"type":"tool_use","id":"t5","name":"Bash","input":{"command":"printenv"}}]}}
+{"type":"user","uuid":"u6","timestamp":"2026-06-19T09:00:37Z","message":{"role":"user","content":[{"type":"tool_result","tool_use_id":"t5","content":"AWS_KEY=AKIAIOSFODNN7EXAMPLE\nAuthorization: Bearer abcdef1234567890tokenvalue\nDATABASE_URL=postgres://admin:secretpass@db.example.com:5432/app"}]}}
+{bad json line that should warn
+{"type":"telemetry","uuid":"x1","timestamp":"2026-06-19T09:00:40Z","note":"future field"}
+{"type":"assistant","uuid":"a7","timestamp":"2026-06-19T09:00:44Z","message":{"role":"assistant","content":[{"type":"text","text":"Done. CSV export added and tests pass."}]}}
+{"type":"user","message":{"role":"user","content":"日本語テスト no timestamp ✅"}}
