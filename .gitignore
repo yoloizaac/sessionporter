@@ -26,3 +26,8 @@ coverage/
 .DS_Store
 *.local
 .claude/
+
+# demo video render artifacts (published as GitHub Release assets, not committed)
+demo/*.mp4
+demo/*.webm
+demo/*.png
