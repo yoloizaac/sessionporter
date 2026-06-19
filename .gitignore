@@ -1,0 +1,28 @@
+# dependencies
+node_modules/
+
+# build output
+dist/
+*.tsbuildinfo
+
+# SessionPorter exports must never be committed
+.sessionporter/
+*.sessionporter.zip
+session.raw.json
+session.raw.jsonl
+
+# env / secrets
+.env
+.env.*
+.sessionporter.json
+
+# test / coverage
+coverage/
+
+# editor / OS
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+*.local
+.claude/

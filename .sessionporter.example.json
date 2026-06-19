@@ -1,0 +1,7 @@
+{
+  "redactTerms": ["internal-codename", "private-company-name"],
+  "redactEmails": true,
+  "redactHomeDirectory": true,
+  "includeToolOutputs": true,
+  "maxToolOutputCharacters": 100000
+}
