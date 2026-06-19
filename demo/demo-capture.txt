@@ -1,0 +1,124 @@
+
+== Build ==
+dist present
+
+== Discover (read-only, metadata only) ==
+> node dist/cli/index.js discover --source claude
+
+=== claude-code ===
+1. 2026-06-19T09:00:00Z  Add CSV export to demo-project
+   id: a9ca177b0cfd  events: 17
+2. ?  (untitled)
+   id: 2e1cfa82b035  events: 0
+
+== Inspect the selected synthetic session ==
+> node dist/cli/index.js inspect --source claude --session a9ca177b0cfd
+Session a9ca177b0cfd (claude-code)
+  Title: Add CSV export to demo-project
+  Project: demo-project
+  Records: 17
+
+== Redact preview (nothing written yet) ==
+> node dist/cli/index.js redact-preview --source claude --session a9ca177b0cfd
+Redaction preview for a9ca177b0cfd (mode: sanitized)
+  api_key: 2
+  email: 1
+  home_path: 2
+  connection_string: 1
+  token: 1
+  Total: 7
+
+== Export (sanitized by default) ==
+> node dist/cli/index.js export --source claude --session a9ca177b0cfd --mode sanitized --no-zip --out 
+".sessionporter\exports" --yes
+
+Selected claude-code session: Add CSV export to demo-project
+
+Potential sensitive values detected:
+  2 api_key
+  1 email
+  2 home_path
+  1 connection_string
+  1 token
+
+Export complete.
+
+Review before sharing:
+  .sessionporter\exports\sessionporter-claude-code-Add_CSV_export_to_demo-project-2026-06-19T19-35-08-094\REDACTION_REPORT.md  (7 redactions)
+
+Upload to AgentTrace:
+  .sessionporter\exports\sessionporter-claude-code-Add_CSV_export_to_demo-project-2026-06-19T19-35-08-094\session.normalized.jsonl
+
+Upload to an offline Claude conversation:
+  .sessionporter\exports\sessionporter-claude-code-Add_CSV_export_to_demo-project-2026-06-19T19-35-08-094\session.transcript.md
+
+Reminders: review the redaction report, do not upload a private bundle publicly, and remember the transcript may contain proprietary code or personal information.
+
+== Bundle contents ==
+checksums.sha256
+manifest.json
+README.md
+REDACTION_REPORT.md
+session.events.jsonl
+session.normalized.jsonl
+session.summary.md
+session.transcript.md
+
+== Transcript (first lines) ==
+# Session transcript: Add CSV export to demo-project
+
+_Source: **claude-code** | Session: `a9ca177b0cfd` | Project: demo-project | Exported: 2026-06-19T19:35:08.094Z | Mode: **sanitized**_
+
+> **Completeness.** Records are the local Claude Code session log. Plaintext 'thinking' (model reasoning) blocks are included where present; truncated tool outputs are marked. A single .jsonl can be a resumed or forked session, so it may be a partial logical conversation. No cloud account was accessed.
+>
+> This transcript contains only records the local tool exposed. Omitted messages and hidden model reasoning are NOT reconstructed. Redacted values appear as `[REDACTED_*]` markers.
+
+## How to read this
+
+- Events are in source order. Each heading shows the event number, category, and role.
+- Commands, file paths, and tool output are shown in fenced blocks exactly as recorded (after redaction).
+- Items marked **(inferred)** are heuristic classifications, not facts stated by the source.
+- The mechanical analysis at the end is deterministic counting, not an AI judgement.
+
+== Redaction report (counts only, never values) ==
+# Redaction report
+
+Mode: **sanitized**. Total redactions: **7**.
+
+> This report never shows an original value. It lists only the category, the count, and the event numbers affected.
+
+## Rules that ran
+
+- api_key
+- connection_string
+- cookie
+- email
+- env_secret
+- home_path
+- ip
+- jwt
+- password
+- private_key
+
+== Validate the bundle (checksums + structure) ==
+> node dist/cli/index.js validate ".sessionporter\exports\sessionporter-claude-code-A
+dd_CSV_export_to_demo-project-2026-06-19T19-35-08-094"
+Bundle is valid (7 files checked).
+
+== Security tests (bounded worker pool) ==
+> npx vitest run tests/security --pool=forks --poolOptions.forks.maxForks=2
+
+[1m[46m RUN [49m[22m [36mv3.2.6 [39m[90mC:/Users/dev/Downloads/sessionporter[39m
+
+ [32mâœ“[39m tests/security/redaction.test.ts [2m([22m[2m17 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+ [32mâœ“[39m tests/security/egress.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 61[2mms[22m[39m
+ [32mâœ“[39m tests/security/paths.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m3 passed[39m[22m[90m (3)[39m
+[2m      Tests [22m [1m[32m26 passed[39m[22m[90m (26)[39m
+[2m   Start at [22m 03:35:11
+[2m   Duration [22m 822ms[2m (transform 294ms, setup 0ms, collect 542ms, tests 84ms, environment 1ms, prepare 413ms)[22m
+
+
+== Done ==
+SessionPorter turned one selected session into a portable, validated, privacy-aware bundle.

@@ -1,0 +1,51 @@
+1
+00:00:00,400 --> 00:00:09,400
+SessionPorter: turn one AI coding session into a portable, privacy-aware bundle. Local-first, sanitized by default, no external AI.
+
+2
+00:00:09,400 --> 00:00:29,400
+AI sessions are useful development evidence but contain secrets and private paths, and every tool stores them differently.
+
+3
+00:00:29,400 --> 00:00:46,400
+Discover lists sessions: metadata only, no content, no full paths.
+
+4
+00:00:46,400 --> 00:00:58,400
+Inspect one selected session by its safe, hashed id.
+
+5
+00:00:58,400 --> 00:01:14,400
+Preview redactions before anything is written. The report shows counts only, never values.
+
+6
+00:01:14,400 --> 00:01:30,400
+Export writes the bundle. Sanitized is the default; private mode requires an explicit confirmation.
+
+7
+00:01:30,400 --> 00:01:44,400
+The bundle: normalized.jsonl goes to AgentTrace; transcript.md goes to an offline Claude conversation; no raw log in sanitized mode.
+
+8
+00:01:44,400 --> 00:02:00,400
+The transcript carries an honest completeness note. Hidden model reasoning is not reconstructed.
+
+9
+00:02:00,400 --> 00:02:16,400
+The redaction report lists category, count, and affected events only. It never prints a value.
+
+10
+00:02:16,400 --> 00:02:38,400
+Every bundle is validated by checksums. A test proves zero network egress. Records are exported, never executed.
+
+11
+00:02:38,400 --> 00:03:04,400
+Built with Claude Code and review subagents. A portability subagent found AgentTrace ignores a flat category, so the output became AgentTrace-native records.
+
+12
+00:03:04,400 --> 00:03:22,400
+Local CLI, no database, no cloud, no external model. Codex is experimental. Current-session matching is heuristic. Redaction is heuristic, so review before sharing.
+
+13
+00:03:22,400 --> 00:03:34,400
+SessionPorter turns one selected AI coding session into a portable, validated, privacy-aware evidence bundle.

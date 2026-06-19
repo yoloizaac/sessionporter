@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>SessionPorter demo replay</title>
+<style>
+  :root { --bg:#0d1117; --fg:#c9d1d9; --green:#3fb950; --yellow:#d29922; --cyan:#39c5cf; --dim:#8b949e; --accent:#58a6ff; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  html,body { width:1280px; height:720px; overflow:hidden; background:var(--bg); color:var(--fg);
+    font-family:"Cascadia Code","Consolas",ui-monospace,monospace; font-size:20px; line-height:1.45; }
+  #stage { position:relative; width:1280px; height:720px; padding:28px 40px 96px; }
+  #label { position:absolute; top:14px; right:18px; font-size:13px; color:var(--dim);
+    border:1px solid #30363d; border-radius:6px; padding:3px 10px; background:#161b22; }
+  #scene { white-space:pre-wrap; }
+  .cmd { color:var(--yellow); }
+  .ok { color:var(--green); }
+  .cyanline { color:var(--cyan); font-weight:700; }
+  .dim { color:var(--dim); }
+  .accent { color:var(--accent); }
+  #title h1 { font-size:84px; letter-spacing:-2px; color:#fff; }
+  #title .sub { font-size:30px; color:var(--accent); margin-top:6px; }
+  #title ul { margin-top:34px; list-style:none; font-size:24px; color:var(--fg); }
+  #title li { margin:10px 0; }
+  #title li::before { content:"●  "; color:var(--green); }
+  #caption { position:absolute; left:0; right:0; bottom:0; min-height:84px; padding:16px 40px;
+    background:#161b22; border-top:2px solid #30363d; font-size:22px; color:#fff; display:flex; align-items:center; }
+  .cursor { display:inline-block; width:11px; height:22px; background:var(--green); vertical-align:-3px;
+    animation:blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity:0; } }
+  @media (prefers-reduced-motion: reduce) { .cursor { animation:none; } }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="label">Automated replay of verified SessionPorter CLI output</div>
+  <div id="scene"></div>
+  <div id="caption"></div>
+</div>
+<script src="scenes.js"></script>
+<script>
+(function () {
+  const scene = document.getElementById('scene');
+  const caption = document.getElementById('caption');
+  let i = 0;
+  function render(s) {
+    caption.textContent = s.caption || '';
+    if (s.html) { scene.innerHTML = s.html; return; }
+    scene.innerHTML = s.lines.map(l => {
+      const cls = l.cls ? ` class="${l.cls}"` : '';
+      return `<div${cls}>${escapeHtml(l.t)}</div>`;
+    }).join('') + '<span class="cursor"></span>';
+  }
+  function escapeHtml(t){ return t.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+  function next() {
+    if (i >= SCENES.length) { window.__done = true; return; }
+    const s = SCENES[i++];
+    render(s);
+    setTimeout(next, s.ms);
+  }
+  // small delay so the recorder is ready
+  setTimeout(next, 400);
+})();
+</script>
+</body>
+</html>
