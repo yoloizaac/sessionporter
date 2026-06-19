@@ -15,6 +15,16 @@ It runs entirely on your machine. No network, no analytics, no telemetry, no
 external AI, and **no runtime dependencies** (only Node's standard library). It
 exports records; it never executes or replays them.
 
+## Assessment submission
+
+Demo video and submission details: [`SUBMISSION.md`](./SUBMISSION.md). The
+3.5 minute [demo video](https://github.com/yoloizaac/sessionporter/releases/tag/assessment-v1.0.0)
+is a Release asset. Working notes and agent handoffs are in
+[`planning/`](./planning/); the sanitized agent-session evidence is in
+[`planning/agent-logs/sessionporter-build/`](./planning/agent-logs/sessionporter-build/);
+the final security audit is
+[`planning/agent-handoffs/final-security-audit.md`](./planning/agent-handoffs/final-security-audit.md).
+
 ## Sources
 
 | Source | Status |
