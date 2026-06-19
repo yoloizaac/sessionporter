@@ -31,7 +31,7 @@ an observed fact.
 ### Where it installs
 
 - Canonical install path: `~/.claude/skills/export-session/SKILL.md`
-  (on this machine `C:\Users\isaac\.claude\skills\export-session\SKILL.md`).
+  (on this machine `C:\Users\<user>\.claude\skills\export-session\SKILL.md`).
 - Keep the authored source in-repo at `skills/claude-code/export-session/SKILL.md` and
   install it with the existing `install-skill` skill (dry-run, skim, then real install),
   not by hand-copying. Per the local `install-skill` convention: after install, tell

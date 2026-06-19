@@ -178,7 +178,7 @@ Each test states input shape → expected behavior. These are the acceptance gat
 3. A PEM `-----BEGIN OPENSSH PRIVATE KEY-----…END-----` spanning many lines → whole block becomes `[REDACTED_PRIVATE_KEY]`, no inner base64 line leaks, block boundaries gone.
 4. `Authorization: Bearer abc.def.ghi`, a `Cookie: session=…` header, a `postgres://u:p@h/db`, a `https://user:tok@github.com/x.git` → each value redacted, surrounding key/scheme/host preserved.
 5. `.env` block with `OPENAI_API_KEY=...`, `DB_PASSWORD=...`, `NEUTRAL=plainvalue` → first two redacted (key-name semantics), `NEUTRAL` kept (unless entropy on).
-6. Home dirs `C:\Users\isaac\project` and `/home/isaac/x` and `/Users/isaac/y` → username segment redacted, rest of path intact.
+6. Home dirs `C:\Users\<user>\project` and `/home/<user>/x` and `/Users/<user>/y` → username segment redacted, rest of path intact.
 
 **Redaction (negative — must NOT redact / no corruption):**
 7. Text containing `[REDACTED_API_KEY]` literally, plus a git SHA, a UUID, `192.168.1.1`, `version 1.2.3.4` → tokens not re-matched, SHA/UUID/private-IP/version not redacted (with default IP policy); assert idempotency: redacting twice == redacting once.

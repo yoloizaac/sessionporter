@@ -4,8 +4,8 @@ Date: 2026-06-20
 Author: portability-reviewer (subagent)
 Scope: analysis only, no code. Reviews SessionPorter's proposed `session.normalized.jsonl`
 and `session.transcript.md` against AgentTrace's actual implemented parser at
-`C:\Users\isaac\Downloads\agenttrace\src\parser\*` and event model at
-`C:\Users\isaac\Downloads\agenttrace\src\domain\event.ts`.
+`C:\Users\<user>\Downloads\agenttrace\src\parser\*` and event model at
+`C:\Users\<user>\Downloads\agenttrace\src\domain\event.ts`.
 
 ---
 
