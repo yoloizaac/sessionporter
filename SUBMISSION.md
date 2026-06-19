@@ -9,13 +9,20 @@ https://github.com/yoloizaac/sessionporter
 
 ## Demo video
 
-- Release: https://github.com/yoloizaac/sessionporter/releases/tag/assessment-v1.0.0
-- Captioned video (download): https://github.com/yoloizaac/sessionporter/releases/download/assessment-v1.0.0/sessionporter-demo-captioned.mp4
-- AI-voice draft (download, synthetic voice, for review): https://github.com/yoloizaac/sessionporter/releases/download/assessment-v1.0.0/sessionporter-demo-ai-voice-draft.mp4
-- Captions: https://github.com/yoloizaac/sessionporter/releases/download/assessment-v1.0.0/demo-captions.srt
+Final demo (the one to watch), 3 minutes 57 seconds:
 
-3 minutes 35 seconds, 1280x720, H.264. A styled replay of real, verified
-SessionPorter output on synthetic data, labelled as a replay on screen.
+- Release: https://github.com/yoloizaac/sessionporter/releases/tag/assessment-v1.0.0
+- Captioned video (download): https://github.com/yoloizaac/sessionporter/releases/download/assessment-v1.0.0/final-demo-captioned.mp4
+- AI-voice draft (download, synthetic voice, for review): https://github.com/yoloizaac/sessionporter/releases/download/assessment-v1.0.0/final-demo-ai-voice-draft.mp4
+- Captions: https://github.com/yoloizaac/sessionporter/releases/download/assessment-v1.0.0/final-demo-captions.srt
+
+1280x720, H.264, 13 scenes. A styled replay of real, verified SessionPorter
+output on synthetic data, labelled as a replay on screen. Production notes,
+shot list, and the evidence map are in [`demo/`](./demo/) and
+[`planning/19-final-demo-production.md`](./planning/19-final-demo-production.md).
+
+An earlier 3:35 cut remains attached to the same Release
+(`sessionporter-demo-*`); the `final-demo-*` assets supersede it.
 
 ## Exported coding-agent logs
 

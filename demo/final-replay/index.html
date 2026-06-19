@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>SessionPorter final demo replay</title>
+<style>
+  :root { --bg:#0d1117; --fg:#c9d1d9; --green:#3fb950; --yellow:#d29922; --cyan:#39c5cf; --dim:#8b949e; --accent:#58a6ff; --red:#f85149; --panel:#161b22; --border:#30363d; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  html,body { width:1280px; height:720px; overflow:hidden; background:var(--bg); color:var(--fg);
+    font-family:"Cascadia Code","Consolas",ui-monospace,monospace; font-size:20px; line-height:1.45; }
+  #stage { position:relative; width:1280px; height:720px; padding:30px 44px 100px; }
+  #label { position:absolute; top:14px; right:18px; font-size:13px; color:var(--dim);
+    border:1px solid var(--border); border-radius:6px; padding:3px 10px; background:var(--panel); }
+  #scene { white-space:pre-wrap; height:100%; }
+  .cmd { color:var(--yellow); }
+  .ok { color:var(--green); }
+  .cyanline { color:var(--cyan); font-weight:700; }
+  .dim { color:var(--dim); }
+  .accent { color:var(--accent); }
+  .red { color:var(--red); }
+  #caption { position:absolute; left:0; right:0; bottom:0; min-height:88px; padding:16px 44px;
+    background:var(--panel); border-top:2px solid var(--border); font-size:22px; color:#fff; display:flex; align-items:center; }
+  .cursor { display:inline-block; width:11px; height:22px; background:var(--green); vertical-align:-3px;
+    animation:blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity:0; } }
+  @media (prefers-reduced-motion: reduce) { .cursor { animation:none; } }
+  /* title */
+  #title { height:560px; display:flex; flex-direction:column; justify-content:center; }
+  #title h1 { font-size:72px; letter-spacing:-2px; color:#fff; }
+  #title .sub { font-size:27px; color:var(--accent); margin-top:8px; }
+  #title ul { margin-top:26px; list-style:none; font-size:21px; }
+  #title li { margin:8px 0; }
+  #title li::before { content:"\2713  "; color:var(--green); }
+  #title .url { margin-top:26px; color:var(--dim); font-size:18px; }
+  /* generic scene heading + panels */
+  .h2 { font-size:30px; color:#fff; margin-bottom:18px; }
+  .tree { font-size:21px; }
+  .tree .d { color:var(--accent); }
+  .tree .note { color:var(--dim); }
+  .twocol { display:grid; grid-template-columns:1fr 1fr; gap:22px; margin-top:8px; }
+  .col { background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:18px 20px; }
+  .col h3 { font-size:20px; margin-bottom:10px; }
+  .col .bad { color:var(--red); }
+  .col .good { color:var(--green); }
+  .listbig { list-style:none; font-size:23px; }
+  .listbig li { margin:10px 0; }
+  .listbig li::before { content:"\2022  "; color:var(--accent); }
+  .listbig li.no::before { content:"\2715  "; color:var(--red); }
+  .pipeline { font-size:26px; line-height:2.0; }
+  .pipeline .step { color:#fff; }
+  .pipeline .arr { color:var(--dim); }
+  .files { font-size:21px; margin-top:18px; }
+  .files .f { color:var(--green); }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="label">Automated replay of verified SessionPorter CLI output</div>
+  <div id="scene"></div>
+  <div id="caption"></div>
+</div>
+<script src="scenes.js"></script>
+<script>
+(function () {
+  const scene = document.getElementById('scene');
+  const caption = document.getElementById('caption');
+  let i = 0;
+  function render(s) {
+    caption.textContent = s.caption || '';
+    if (s.html) { scene.innerHTML = s.html; return; }
+    scene.innerHTML = s.lines.map(l => {
+      const cls = l.cls ? ` class="${l.cls}"` : '';
+      return `<div${cls}>${escapeHtml(l.t)}</div>`;
+    }).join('') + '<span class="cursor"></span>';
+  }
+  function escapeHtml(t){ return t.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+  function next() {
+    if (i >= SCENES.length) { window.__done = true; return; }
+    const s = SCENES[i++];
+    render(s);
+    setTimeout(next, s.ms);
+  }
+  setTimeout(next, 400);
+})();
+</script>
+</body>
+</html>

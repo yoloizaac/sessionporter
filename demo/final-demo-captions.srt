@@ -1,0 +1,51 @@
+1
+00:00:00,400 --> 00:00:15,880
+SessionPorter converts one selected AI coding session into a portable, validated, privacy-aware bundle.
+
+2
+00:00:15,880 --> 00:00:33,080
+Logs are useful evidence but contain credentials, private paths, and tool-specific formats. SessionPorter discovers one session, redacts, validates, and exports.
+
+3
+00:00:33,080 --> 00:00:50,280
+Source-specific adapters are separate from normalization, redaction, bundle creation, and validation. The Claude Code skill is a thin wrapper around the same core.
+
+4
+00:00:50,280 --> 00:01:07,480
+Discovery is read-only and returns metadata first. SessionPorter never exports everything, and refuses to guess when the current session is ambiguous.
+
+5
+00:01:07,480 --> 00:01:28,120
+Inspect one selected session, then preview likely redactions. The report shows categories and counts, never the original secret.
+
+6
+00:01:28,120 --> 00:01:45,320
+Sanitized mode is the default. Private mode keeps more content and requires explicit confirmation; it never falls back silently.
+
+7
+00:01:45,320 --> 00:02:07,680
+The transcript preserves chronological evidence. The redaction report explains changes, the manifest records mode and counts, and checksums make tampering detectable.
+
+8
+00:02:07,680 --> 00:02:26,600
+The validator checks required files and SHA-256 checksums. Tests cover parsing, normalization, redaction, archive safety, path traversal, symlinks, and network isolation.
+
+9
+00:02:26,600 --> 00:02:49,820
+Claude Code was the primary agent. Focused subagents independently reviewed formats, redaction, portability, skill UX, and final security. The main agent integrated their handoffs.
+
+10
+00:02:49,820 --> 00:03:11,320
+One incorrect assumption: a flat JSONL would suffice for AgentTrace. A subagent read its parser and found analytics depend on linked tool-use and tool-result records. The design was corrected.
+
+11
+00:03:11,320 --> 00:03:29,380
+To stay focused, there is no web app, database, account system, or cloud service. Deterministic local conversion is easier to test, cheaper, and safer for sensitive logs.
+
+12
+00:03:29,380 --> 00:03:46,580
+The weakest area is current-session matching, because the CLI does not always receive the exact active session id. Redaction is heuristic and still needs manual review.
+
+13
+00:03:46,580 --> 00:03:57,680
+SessionPorter turns one selected AI coding session into a portable, validated, privacy-aware evidence bundle while keeping sensitive processing local.
