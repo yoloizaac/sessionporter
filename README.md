@@ -17,6 +17,10 @@ exports records; it never executes or replays them.
 
 ## Assessment submission
 
+The original submission is tagged `assessment-v1.0.0` (20 June 2026). Provenance
+signing was added afterward; see [`CHANGELOG.md`](./CHANGELOG.md) and
+[`planning/13-provenance-signing.md`](./planning/13-provenance-signing.md).
+
 Demo video and submission details: [`SUBMISSION.md`](./SUBMISSION.md). The
 3.5 minute [demo video](https://github.com/yoloizaac/sessionporter/releases/tag/assessment-v1.0.0)
 is a Release asset. Working notes and agent handoffs are in
@@ -70,10 +74,12 @@ Complete bundle:         .sessionporter/exports/....zip
 sessionporter discover [--source claude|codex] [--recent <days>] [--here] [--query <q>] [--json]
 sessionporter inspect --source claude --session <id>
 sessionporter redact-preview --source claude --session <id> [--mode sanitized|private]
-sessionporter export --source claude --session <id> [--mode sanitized|private] [--out <dir>] [--no-zip] [--json] [--yes]
+sessionporter export --source claude --session <id> [--mode sanitized|private] [--out <dir>] [--no-zip] [--sign] [--key <pem>] [--json] [--yes]
 sessionporter export --source claude --current
 sessionporter import-transcript <file> [--mode sanitized]
 sessionporter validate <bundle-path>
+sessionporter keygen [--out <dir>]
+sessionporter verify <bundle-path> [--pubkey <sha256:...>]
 ```
 
 Scripts: `npm run build | test | lint | typecheck | test:security | validate:fixtures`.
@@ -82,8 +88,9 @@ Scripts: `npm run build | test | lint | typecheck | test:security | validate:fix
 
 `session.normalized.jsonl` (AgentTrace), `session.events.jsonl` (flat normalized),
 `session.transcript.md` (offline Claude), `session.summary.md`, `manifest.json`,
-`REDACTION_REPORT.md`, `README.md`, `checksums.sha256`, optional `bundle.zip`, and
-`session.raw.jsonl` only in private mode. Details in `planning/04-bundle-format.md`.
+`REDACTION_REPORT.md`, `README.md`, `checksums.sha256`, optional `signature.json`
+(when signed) and `bundle.zip`, and `session.raw.jsonl` only in private mode.
+Details in `planning/04-bundle-format.md`.
 
 ## Privacy and security
 
@@ -95,8 +102,14 @@ Scripts: `npm run build | test | lint | typecheck | test:security | validate:fix
   report shows category and count only, never a value.
 - Path-traversal containment, symlink refusal, atomic writes, overwrite refusal,
   and self-excluding checksums.
+- **Optional provenance signing.** `keygen` makes an ed25519 keypair (Node
+  stdlib, no new dependencies); `export --sign` signs the checksums so `verify`
+  can prove a bundle is authentic and unaltered since export, not just internally
+  consistent. The private key never enters a bundle. Pin a signer with
+  `verify --pubkey <fingerprint>`. Design and honest limits:
+  `planning/13-provenance-signing.md`.
 - Exports are written to `.sessionporter/exports/` (git-ignored). A test proves a
-  full export performs zero network calls.
+  full export, signed or not, performs zero network calls.
 
 Details: `planning/03-redaction-model.md`, `docs/agenttrace-compatibility.md`,
 `docs/offline-claude-usage.md`.
@@ -134,7 +147,8 @@ AI helped and one mistake it had to correct is in
 | Normalized model | `src/types/index.ts`, `planning/02-normalized-schema.md` |
 | Redaction | `src/redact/`, `planning/03-redaction-model.md` |
 | Bundle | `src/bundle/`, `planning/04-bundle-format.md` |
-| Tests (62) | `tests/`, `planning/07-test-plan.md` |
+| Provenance signing | `src/bundle/signing.ts`, `planning/13-provenance-signing.md` |
+| Tests (73) | `tests/`, `planning/07-test-plan.md` |
 | AgentTrace compatibility | `docs/agenttrace-compatibility.md` |
 | Offline Claude usage | `docs/offline-claude-usage.md` |
 | Codex investigation | `planning/codex-adapter-investigation.md` |

@@ -3,6 +3,7 @@
  * validation live below the engine; this file is argument parsing, prompts, and
  * output formatting only. */
 import { join, resolve } from 'node:path';
+import { readFile, stat } from 'node:fs/promises';
 import { createInterface } from 'node:readline/promises';
 import type { ExportMode, SourceId, SessionMeta } from '../types/index.js';
 import { loadConfig } from '../core/config.js';
@@ -15,8 +16,14 @@ import {
   type ExportResult,
 } from '../core/engine.js';
 import { validateBundle } from '../validate/validate.js';
+import { generateSigningKeyPair, publicKeyFingerprint } from '../bundle/signing.js';
+import { ensureDir, atomicWrite } from '../security/paths.js';
 import { SessionPorterError, errorCode, errorMessage } from '../core/errors.js';
-import { printJsonOk, printJsonError, human, humanErr, exitCodeFor } from './output.js';
+import { printJsonOk, printJsonError, printJsonResult, human, humanErr, exitCodeFor } from './output.js';
+
+/** Default filename for a generated signing key (private key). */
+const SIGNING_KEY_FILE = 'sessionporter-signing-key.pem';
+const SIGNING_PUB_FILE = 'sessionporter-signing-pub.pem';
 
 interface Parsed {
   command: string;
@@ -109,6 +116,12 @@ async function main(): Promise<void> {
         break;
       case 'validate':
         await cmdValidate(parsed, json);
+        break;
+      case 'keygen':
+        await cmdKeygen(parsed, json, cwd);
+        break;
+      case 'verify':
+        await cmdVerify(parsed, json);
         break;
       case 'help':
       default:
@@ -251,6 +264,8 @@ async function cmdExport(parsed: Parsed, json: boolean, cwd: string, config: Awa
     throw new SessionPorterError('PRIVATE_NOT_CONFIRMED', 'Private export requires --confirm-private in non-interactive mode.');
   }
 
+  const signingKeyPem = await loadSigningKey(parsed, cwd);
+
   const result = await exportSession({
     source,
     sessionId,
@@ -263,6 +278,7 @@ async function cmdExport(parsed: Parsed, json: boolean, cwd: string, config: Awa
     makeZip: parsed.flags['no-zip'] !== true,
     includeRaw: mode === 'private',
     allowSecrets: parsed.flags['allow-secrets'] === true,
+    signingKeyPem,
   });
 
   reportExport(result, json, mode);
@@ -292,10 +308,92 @@ async function cmdValidate(parsed: Parsed, json: boolean): Promise<void> {
     printJsonOk('validate', result);
   } else {
     human(result.ok ? `Bundle is valid (${result.checkedFiles} files checked).` : 'Bundle is INVALID:');
+    if (result.signature === 'valid') human(`  provenance: signed (${result.signerFingerprint})`);
+    else if (result.signature === 'absent') human('  provenance: unsigned (run `verify` to require a signature)');
     for (const e of result.errors) human(`  error: ${e}`);
     for (const w of result.warnings) human(`  warning: ${w}`);
   }
   if (!result.ok) process.exitCode = 2;
+}
+
+/** Read the signing key when --sign or --key is given; otherwise sign nothing. */
+async function loadSigningKey(parsed: Parsed, cwd: string): Promise<string | undefined> {
+  const wantSign = parsed.flags.sign === true || typeof parsed.flags.sign === 'string';
+  const keyFlag = flagStr(parsed.flags, 'key');
+  if (!wantSign && !keyFlag) return undefined;
+  const keyPath = keyFlag ? resolve(cwd, keyFlag) : resolve(cwd, SIGNING_KEY_FILE);
+  try {
+    return await readFile(keyPath, 'utf8');
+  } catch {
+    throw new SessionPorterError(
+      'SIGNING_KEY_UNREADABLE',
+      `Could not read signing key at ${keyPath}. Generate one with: sessionporter keygen`,
+    );
+  }
+}
+
+async function cmdKeygen(parsed: Parsed, json: boolean, cwd: string): Promise<void> {
+  const outDir = flagStr(parsed.flags, 'out') ? resolve(cwd, flagStr(parsed.flags, 'out') as string) : cwd;
+  const privPath = join(outDir, SIGNING_KEY_FILE);
+  const pubPath = join(outDir, SIGNING_PUB_FILE);
+  for (const p of [privPath, pubPath]) {
+    try {
+      await stat(p);
+      throw new SessionPorterError('OUTPUT_EXISTS', `A key already exists at ${p}. Move or remove it first.`);
+    } catch (err) {
+      if (err instanceof SessionPorterError) throw err;
+      // ENOENT is expected.
+    }
+  }
+  const { privateKeyPem, publicKeyPem } = generateSigningKeyPair();
+  await ensureDir(outDir);
+  await atomicWrite(privPath, privateKeyPem);
+  await atomicWrite(pubPath, publicKeyPem);
+  const fingerprint = publicKeyFingerprint(publicKeyPem);
+  if (json) {
+    printJsonOk('keygen', { privateKey: privPath, publicKey: pubPath, fingerprint });
+    return;
+  }
+  human('Wrote signing keypair:');
+  human(`  private key: ${privPath}`);
+  human(`  public key:  ${pubPath}`);
+  human(`  fingerprint: ${fingerprint}`);
+  human('\nKeep the private key secret and never commit it. Share the fingerprint so a reviewer can pin your signature.');
+  human(`Sign an export with:  sessionporter export --source claude --current --sign --key ${privPath}`);
+}
+
+async function cmdVerify(parsed: Parsed, json: boolean): Promise<void> {
+  const dir = parsed.positionals[0];
+  if (!dir) throw new SessionPorterError('BAD_ARGS', 'Usage: sessionporter verify <bundle-path> [--pubkey <sha256:...>]');
+  const result = await validateBundle(resolve(process.cwd(), dir));
+  const wantFp = flagStr(parsed.flags, 'pubkey');
+  const errors = [...result.errors];
+  if (result.signature === 'absent') {
+    errors.push('No provenance signature found (bundle is unsigned). Add one with export --sign.');
+  }
+  const fingerprintMatches = !wantFp || wantFp === result.signerFingerprint;
+  if (result.signature === 'valid' && !fingerprintMatches) {
+    errors.push(`Signer fingerprint ${result.signerFingerprint ?? '(none)'} does not match the expected ${wantFp}.`);
+  }
+  const ok = result.ok && result.signature === 'valid' && fingerprintMatches;
+  if (json) {
+    // Top-level `ok` carries the verdict so a caller checking `.ok` is not misled.
+    printJsonResult('verify', ok, {
+      signature: result.signature,
+      signerFingerprint: result.signerFingerprint,
+      structurallyValid: result.ok,
+      errors,
+      warnings: result.warnings,
+    });
+  } else if (ok) {
+    human('Bundle is valid and signed.');
+    human(`  signer fingerprint: ${result.signerFingerprint}`);
+  } else {
+    human('Bundle FAILED verification:');
+    for (const e of errors) human(`  error: ${e}`);
+    for (const w of result.warnings) human(`  warning: ${w}`);
+  }
+  if (!ok) process.exitCode = 2;
 }
 
 function reportExport(result: ExportResult, json: boolean, mode: ExportMode): void {
@@ -314,10 +412,14 @@ function reportExport(result: ExportResult, json: boolean, mode: ExportMode): vo
       redactionTotal: result.redaction.total,
       validation: result.validation,
       gitWarning: result.gitWarning,
+      provenance: result.signatureFingerprint
+        ? { signed: true, fingerprint: result.signatureFingerprint, signature: result.files.signature }
+        : { signed: false },
     });
     return;
   }
   human('\nExport complete.');
+  if (result.signatureFingerprint) human(`Provenance: signed (${result.signatureFingerprint})`);
   if (result.gitWarning) human(`Note: ${result.gitWarning}`);
   human(`\nReview before sharing:\n  ${result.files.redactionReport}  (${result.redaction.total} redactions)`);
   human(`\nUpload to AgentTrace:\n  ${result.files.normalized}`);
@@ -354,12 +456,15 @@ Usage:
   sessionporter discover [--source claude|codex] [--recent <days>] [--here] [--query <q>] [--json]
   sessionporter inspect --source claude --session <id> [--json]
   sessionporter redact-preview --source claude --session <id> [--mode sanitized|private] [--json]
-  sessionporter export --source claude --session <id> [--mode sanitized|private] [--zip] [--out <dir>] [--json] [--yes]
+  sessionporter export --source claude --session <id> [--mode sanitized|private] [--zip] [--out <dir>] [--sign] [--key <pem>] [--json] [--yes]
   sessionporter export --source claude --current
   sessionporter import-transcript <file> [--mode sanitized] [--zip]
   sessionporter validate <bundle-path> [--json]
+  sessionporter keygen [--out <dir>]
+  sessionporter verify <bundle-path> [--pubkey <sha256:...>] [--json]
 
 Defaults: sanitized mode; private mode requires interactive "CONFIRM PRIVATE" or --confirm-private.
+Provenance: run keygen once, then export --sign to ed25519-sign the bundle; verify checks it.
 Exports are written under .sessionporter/exports/ (git-ignored). Nothing is uploaded.`);
 }
 

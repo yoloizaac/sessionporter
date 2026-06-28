@@ -125,6 +125,8 @@ export interface ExportOptions {
   makeZip: boolean;
   includeRaw: boolean;
   allowSecrets: boolean;
+  /** ed25519 private key (PEM) to sign the bundle's checksums, when provided. */
+  signingKeyPem?: string;
 }
 
 export interface ExportResult extends BundleResult {
@@ -158,6 +160,7 @@ export async function exportSession(opts: ExportOptions): Promise<ExportResult> 
     exportedAt: opts.exportedAt,
     includeRaw: opts.includeRaw,
     makeZip: opts.makeZip,
+    signing: opts.signingKeyPem ? { privateKeyPem: opts.signingKeyPem } : undefined,
   });
   return { ...bundle, meta, how, redaction: summary, stats: analyzeEvents(events) };
 }

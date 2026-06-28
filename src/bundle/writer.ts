@@ -14,6 +14,7 @@ import { buildRedactionReport } from './redactionReport.js';
 import { buildBundleReadme } from './readme.js';
 import { buildManifest } from './manifest.js';
 import { buildChecksumsFile, sha256 } from './checksums.js';
+import { signChecksums, SIGNATURE_FILE } from './signing.js';
 import { createZip } from './zip.js';
 import { validateBundle, type ValidationResult } from '../validate/validate.js';
 
@@ -31,14 +32,18 @@ export interface WriteBundleArgs {
   exportedAt: string;
   includeRaw: boolean;
   makeZip: boolean;
+  /** When present, sign the bundle's checksums with this ed25519 private key (PEM). */
+  signing?: { privateKeyPem: string };
 }
 
 export interface BundleResult {
   bundleDir: string;
   zipPath: string | null;
-  files: { normalized: string; transcript: string; summary: string; redactionReport: string; manifest: string };
+  files: { normalized: string; transcript: string; summary: string; redactionReport: string; manifest: string; signature: string | null };
   validation: ValidationResult;
   gitWarning: string | null;
+  /** Public-key fingerprint of the signer, when the bundle was signed. */
+  signatureFingerprint: string | null;
 }
 
 export async function writeBundle(args: WriteBundleArgs): Promise<BundleResult> {
@@ -114,9 +119,21 @@ export async function writeBundle(args: WriteBundleArgs): Promise<BundleResult> 
   const forChecksum: Record<string, string> = { ...content, 'manifest.json': manifestStr };
   const checksumsStr = buildChecksumsFile(forChecksum);
 
+  // Optional provenance: sign the checksums bytes. signature.json is a sidecar,
+  // deliberately not listed in checksums (it is derived from them) nor in the
+  // manifest (so signing leaves every other file byte-identical).
+  let signatureStr: string | null = null;
+  let signatureFingerprint: string | null = null;
+  if (args.signing) {
+    const sig = signChecksums(checksumsStr, args.signing.privateKeyPem, exportedAt);
+    signatureStr = JSON.stringify(sig, null, 2) + '\n';
+    signatureFingerprint = sig.publicKeyFingerprint;
+  }
+
   // Write everything atomically into a contained dir.
   await ensureDir(bundleDir);
   const allFiles: Record<string, string> = { ...content, 'manifest.json': manifestStr, 'checksums.sha256': checksumsStr };
+  if (signatureStr) allFiles[SIGNATURE_FILE] = signatureStr;
   for (const [name, body] of Object.entries(allFiles)) {
     const target = assertWithin(bundleDir, name);
     await atomicWrite(target, body);
@@ -143,8 +160,10 @@ export async function writeBundle(args: WriteBundleArgs): Promise<BundleResult> 
       summary: join(bundleDir, 'session.summary.md'),
       redactionReport: join(bundleDir, 'REDACTION_REPORT.md'),
       manifest: join(bundleDir, 'manifest.json'),
+      signature: signatureStr ? join(bundleDir, SIGNATURE_FILE) : null,
     },
     validation,
     gitWarning,
+    signatureFingerprint,
   };
 }

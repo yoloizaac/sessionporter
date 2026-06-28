@@ -13,6 +13,12 @@ export function printJsonOk(command: string, data: unknown): void {
   process.stdout.write(JSON.stringify(env) + '\n');
 }
 
+/** Emit a JSON envelope whose top-level `ok` carries a verdict (e.g. verify). */
+export function printJsonResult(command: string, ok: boolean, data: unknown): void {
+  const env: JsonEnvelope = { ok, command, data };
+  process.stdout.write(JSON.stringify(env) + '\n');
+}
+
 export function printJsonError(command: string, err: unknown): void {
   const env: JsonEnvelope = {
     ok: false,
@@ -50,6 +56,7 @@ export function exitCodeFor(code: string): number {
     'UNSAFE_REQUIRES_PRIVATE',
     'UNSUPPORTED_SOURCE',
     'BAD_ARGS',
+    'SIGNING_KEY_UNREADABLE',
   ]);
   return userCorrectable.has(code) ? 2 : 1;
 }
